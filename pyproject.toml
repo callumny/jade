@@ -1,0 +1,19 @@
+[project]
+name = "jade"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Callum Williams",email = "callum.williams@bidfx.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pytest (>=8.3.5,<9.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "jade", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
