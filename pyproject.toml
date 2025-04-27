@@ -1,15 +1,19 @@
 [project]
 name = "jade"
 version = "0.1.0"
-description = ""
+description = "Java Analyzer for Detecting Effects - A tool to analyze Java code changes and identify impacted tests"
 authors = [
     {name = "Callum Williams",email = "callum.williams@bidfx.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pytest (>=8.3.5,<9.0.0)"
+    "pytest (>=8.3.5,<9.0.0)",
+    "javalang (>=0.13.0,<0.14.0)"
 ]
+
+[project.scripts]
+jade = "jade.cli:main"
 
 [tool.poetry]
 packages = [{include = "jade", from = "src"}]
