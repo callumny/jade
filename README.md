@@ -90,6 +90,32 @@ If you get errors related to Python version requirements:
 
 2. Ensure you have Python 3.12 or later installed, as required by JADE.
 
+#### WSL Python Not Found Error
+
+If you encounter the error `[Errno 2] No such file or directory: 'python'` when running `poetry install` in WSL:
+
+1. Use the included `poetry-wsl` wrapper script which automatically detects and uses either `python` or `python3`:
+   ```bash
+   # Make the script executable (only needed once)
+   chmod +x poetry-wsl
+
+   # Use the wrapper script instead of calling poetry directly
+   ./poetry-wsl install
+   ```
+
+2. Alternatively, you can:
+   - Create a symbolic link to make "python" point to your Python 3.12 installation:
+     ```bash
+     sudo ln -sf /usr/bin/python3.12 /usr/bin/python
+     ```
+   - Or tell Poetry which Python executable to use:
+     ```bash
+     poetry env use python3.12
+     poetry install
+     ```
+
+See the [WSL Notes](#wsl-notes) section for more detailed instructions.
+
 ### Platform Compatibility
 
 JADE is designed to be cross-platform and can be run on:
@@ -111,9 +137,44 @@ On Windows, you might need to:
 
 When running in WSL:
 
-1. Make sure you have Python 3.12 or later installed in your WSL environment
+1. Make sure you have Python 3.12 or later installed in your WSL environment:
+   ```bash
+   # Install Python 3.12 in WSL (Ubuntu/Debian)
+   sudo apt update
+   sudo apt install python3.12
+
+   # Create a symbolic link to make 'python' point to 'python3.12'
+   sudo ln -sf /usr/bin/python3.12 /usr/bin/python
+
+   # Verify the installation
+   python --version  # Should show Python 3.12.x
+   ```
+
 2. You may need to run `poetry config virtualenvs.in-project true` to ensure virtual environments are created in the project directory
-3. You can run JADE in WSL in two ways:
+
+3. If you encounter the error `[Errno 2] No such file or directory: 'python'` when running `poetry install`:
+   - This occurs because Poetry is looking for an executable named exactly "python" but can't find it
+   - WSL often has Python installed as "python3" rather than "python"
+   - Use the included `poetry-wsl` wrapper script which automatically detects and uses either `python` or `python3`:
+     ```bash
+     # Make the script executable (only needed once)
+     chmod +x poetry-wsl
+
+     # Use the wrapper script instead of calling poetry directly
+     ./poetry-wsl install
+     ```
+   - Alternatively, you can:
+     - Use the symbolic link command above to create a "python" executable
+     - Or tell Poetry which Python executable to use:
+       ```bash
+       # Tell Poetry to use python3.12 specifically
+       poetry env use python3.12
+
+       # Then install dependencies
+       poetry install
+       ```
+
+4. You can run JADE in WSL in two ways:
 
    a. Using `poetry shell` (traditional method):
    ```bash

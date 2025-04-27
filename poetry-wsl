@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+# Check if python3 is available
+if command -v python3 &> /dev/null; then
+    # Use python3 for Poetry
+    PYTHON_CMD="python3"
+elif command -v python &> /dev/null; then
+    # Fall back to python if python3 is not available
+    PYTHON_CMD="python"
+else
+    echo "Error: Neither python3 nor python executable found."
+    exit 1
+fi
+
+# Run Poetry with the specified Python executable
+POETRY_PYTHON="$PYTHON_CMD" poetry "$@"
