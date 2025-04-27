@@ -316,7 +316,7 @@ class JavaTestRunner:
         compile_cmd = [
             "javac", 
             "-d", temp_dir,
-            "-cp", f"{temp_dir};{src_dir}",
+            "-cp", f"{temp_dir}{os.pathsep}{src_dir}",
             file_path
         ]
 
@@ -347,7 +347,7 @@ class JavaTestRunner:
         # Run the test using JUnit
         run_cmd = [
             "java",
-            "-cp", f"{temp_dir};{src_dir}",
+            "-cp", f"{temp_dir}{os.pathsep}{src_dir}",
             "org.junit.runner.JUnitCore",
             f"{class_name}#{method}"
         ]

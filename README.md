@@ -11,14 +11,25 @@ JADE analyzes Java code changes and identifies which tests are impacted, allowin
 
 ## Installation
 
-JADE can be installed as a command-line executable that's automatically added to your PATH.
+### Prerequisites
+
+- Python 3.12 or later
+- pip or Poetry (2.0.0 or later recommended)
+- Git (required for analyzing code changes)
+
+### Installing with pip
 
 ```bash
 # Install from the current directory
 pip install .
+```
 
-# Or, if you prefer using Poetry
-poetry install
+### Installing with Poetry
+
+```bash
+# If you're using Poetry for the first time with this project
+poetry lock --no-update  # Regenerate the lock file for your Poetry version
+poetry install           # Install the package and its dependencies
 ```
 
 After installation, the `jade` command will be available in your terminal.
@@ -34,7 +45,101 @@ jade --help
 
 This should display the help message with all available options.
 
+### Troubleshooting
+
+#### Command Not Found
+
+If you get a "Command not found" error after installation:
+
+1. **Using Poetry**: Make sure you're in the Poetry virtual environment:
+   ```bash
+   # Activate the virtual environment
+   poetry shell
+
+   # Then try running jade
+   jade --help
+   ```
+
+2. **Using pip**: Ensure the installation directory is in your PATH:
+   ```bash
+   # Find where pip installed the package
+   pip show jade
+
+   # Check if the installation directory is in your PATH
+   echo $PATH  # On Linux/macOS
+   echo %PATH%  # On Windows
+   ```
+
+#### Lock File Compatibility Warning
+
+If you see warnings about the lock file not being compatible with your version of Poetry:
+
+```bash
+# Regenerate the lock file for your Poetry version
+poetry lock --no-update
+```
+
+#### Python Version Error
+
+If you get errors related to Python version requirements:
+
+1. Check your Python version:
+   ```bash
+   python --version
+   ```
+
+2. Ensure you have Python 3.12 or later installed, as required by JADE.
+
+### Platform Compatibility
+
+JADE is designed to be cross-platform and can be run on:
+
+- Windows
+- macOS
+- Linux
+- Windows Subsystem for Linux (WSL)
+
+#### Windows-Specific Notes
+
+On Windows, you might need to:
+
+1. Use PowerShell or Command Prompt with appropriate permissions
+2. Use `%PATH%` instead of `$PATH` when checking environment variables
+3. If using WSL, remember that Poetry environments in WSL are separate from Windows environments
+
+#### WSL Notes
+
+When running in WSL:
+
+1. Make sure you have Python 3.12 or later installed in your WSL environment
+2. You may need to run `poetry config virtualenvs.in-project true` to ensure virtual environments are created in the project directory
+3. You can run JADE in WSL in two ways:
+
+   a. Using `poetry shell` (traditional method):
+   ```bash
+   # Activate the virtual environment
+   poetry shell
+
+   # Then run jade commands
+   jade --help
+   ```
+
+   b. Using the `jade-wsl` wrapper script (recommended):
+   ```bash
+   # Make the script executable (only needed once after cloning the repository)
+   chmod +x jade-wsl
+
+   # Run jade commands directly without poetry shell
+   ./jade-wsl --help
+   ```
+
+   The wrapper script automatically activates the virtual environment and runs the jade command, eliminating the need for `poetry shell`.
+
+   > **Note**: The `chmod +x` command needs to be run in WSL, not in Windows PowerShell or Command Prompt.
+
 ## Usage
+
+### Standard Usage (after activating virtual environment)
 
 ```bash
 # Basic usage (compare HEAD to previous commit)
@@ -53,6 +158,29 @@ jade --project-dir=/path/to/project        # Specify project directory
 jade --test-dir=/path/to/tests             # Specify test directory
 jade --build-tool=gradle                   # Specify build tool
 jade --output-file=results.txt             # Save results to file
+```
+
+### WSL Usage with Wrapper Script
+
+In WSL, you can use the `jade-wsl` wrapper script to run commands without activating the virtual environment first:
+
+```bash
+# Basic usage (compare HEAD to previous commit)
+./jade-wsl
+
+# Compare with specific commits/branches
+./jade-wsl -c 3                                  # Compare to 3rd previous commit
+./jade-wsl --branch=feature-branch               # Compare to another branch
+./jade-wsl --branch=branch1 --branch=branch2     # Compare two branches
+./jade-wsl --commit=abc123                       # Compare to specific commit
+
+# Additional options
+./jade-wsl --tests-only                          # Show only impacted tests
+./jade-wsl --run-tests                           # Run the impacted tests
+./jade-wsl --project-dir=/path/to/project        # Specify project directory
+./jade-wsl --test-dir=/path/to/tests             # Specify test directory
+./jade-wsl --build-tool=gradle                   # Specify build tool
+./jade-wsl --output-file=results.txt             # Save results to file
 ```
 
 ## How It Works
