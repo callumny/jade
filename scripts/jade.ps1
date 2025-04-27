@@ -1,0 +1,1 @@
+python -m jade.cli $args
