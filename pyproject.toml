@@ -22,7 +22,6 @@ description = "Java Analyzer for Detecting Effects - A tool to analyze Java code
 authors = ["Callum Williams <callum.williams@bidfx.com>"]
 readme = "README.md"
 packages = [{include = "jade", from = "src"}]
-include = ["scripts/**/*"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
