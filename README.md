@@ -38,6 +38,8 @@ This should display the help message with all available options.
 
 If you prefer not to install the package, you can also run jade directly using the scripts in the `scripts` directory:
 
+> **Note:** The recommended approach is to install the package using pip or Poetry as described above, which automatically adds the `jade` command to your PATH.
+
 #### Windows (Command Prompt)
 ```cmd
 scripts\jade.bat [options]
@@ -50,7 +52,12 @@ scripts\jade.ps1 [options]
 
 #### Linux/macOS/WSL
 ```bash
+# Option 1: Run the script directly
 ./scripts/jade.sh [options]
+
+# Option 2: Make the script executable and add the scripts directory to your PATH
+chmod +x scripts/jade.sh
+export PATH="$PATH:$(pwd)/scripts"  # Add to ~/.bashrc or ~/.zshrc to make permanent
 ```
 
 ## Usage
@@ -81,6 +88,36 @@ jade --output-file=results.txt             # Save results to file
 3. Analyzes test files to map tests to the methods they invoke
 4. Identifies tests impacted by the changed methods
 5. Optionally runs the impacted tests
+
+## Troubleshooting
+
+### Command 'jade' not found in WSL
+
+If you've added the jade script to your PATH in WSL but still get "Command 'jade' not found" when running `jade --help`, check your PATH configuration:
+
+1. **Incorrect:** Adding the script file itself to PATH
+   ```bash
+   # This won't work
+   export PATH="$PATH:~/bin/jade/scripts/jade.sh"
+   ```
+
+2. **Correct:** Add the directory containing the script to PATH
+   ```bash
+   # This will work
+   export PATH="$PATH:~/bin/jade/scripts"
+   ```
+
+   Make sure the script is executable:
+   ```bash
+   chmod +x ~/bin/jade/scripts/jade.sh
+   ```
+
+3. **Recommended:** Install the package using pip
+   ```bash
+   cd ~/bin/jade
+   pip install .
+   ```
+   This automatically adds the `jade` command to your PATH.
 
 ## Contributing
 
