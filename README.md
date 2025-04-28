@@ -14,25 +14,95 @@ JADE analyzes Java code changes and identifies which tests are impacted, allowin
 ### Prerequisites
 
 - Python 3.12 or later
-- pip or Poetry (2.0.0 or later recommended)
 - Git (required for analyzing code changes)
+- One of the following:
+  - [Poetry](https://python-poetry.org/docs/#installation) (recommended)
+  - pip (with virtual environment)
+  - pipx
 
-### Installing with pip
+### Installation Methods
+
+Choose one of the following installation methods:
+
+#### Method 1: Using Poetry (Recommended)
+
+Poetry is the recommended way to install JADE as it handles dependencies and virtual environments automatically:
 
 ```bash
-# Install from the current directory
-pip install .
+# Clone the repository (if you haven't already)
+git clone https://github.com/yourusername/jade.git
+cd jade
+
+# Install using Poetry
+poetry install
+
+# Run JADE using Poetry
+poetry run jade --help
+
+# Or, activate the virtual environment and run JADE directly
+poetry shell
+jade --help
 ```
 
-### Installing with Poetry
+#### Method 2: Using a Virtual Environment
+
+If you encounter the "externally-managed-environment" error with pip, create a virtual environment:
 
 ```bash
-# If you're using Poetry for the first time with this project
-poetry lock --no-update  # Regenerate the lock file for your Poetry version
-poetry install           # Install the package and its dependencies
+# Clone the repository (if you haven't already)
+git clone https://github.com/yourusername/jade.git
+cd jade
+
+# Create a virtual environment
+python -m venv .venv
+
+# Activate the virtual environment
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
+source .venv/bin/activate
+
+# Install JADE in development mode
+pip install -e .
+
+# Now you can run JADE
+jade --help
 ```
 
-After installation, the `jade` command will be available in your terminal.
+#### Method 3: Using pipx
+
+pipx is designed for installing Python applications in isolated environments:
+
+```bash
+# Install pipx if you don't have it
+python -m pip install --user pipx
+python -m pipx ensurepath
+
+# Install JADE using pipx
+pipx install -e /path/to/jade
+
+# Run JADE
+jade --help
+```
+
+#### Method 4: Global Installation (Not Recommended for System Python)
+
+This method may fail with an "externally-managed-environment" error on some systems:
+
+```bash
+# Clone the repository (if you haven't already)
+git clone https://github.com/yourusername/jade.git
+cd jade
+
+# Install globally using pip
+pip install -e .
+
+# If you get an "externally-managed-environment" error, use one of the methods above instead
+# Or, if you understand the risks, you can override with:
+# pip install -e . --break-system-packages
+```
+
+This will install the `jade` command in your system PATH, making it available from any directory.
 
 ### Verifying Installation
 
@@ -51,16 +121,7 @@ This should display the help message with all available options.
 
 If you get a "Command not found" error after installation:
 
-1. **Using Poetry**: Make sure you're in the Poetry virtual environment:
-   ```bash
-   # Activate the virtual environment
-   poetry shell
-
-   # Then try running jade
-   jade --help
-   ```
-
-2. **Using pip**: Ensure the installation directory is in your PATH:
+1. Ensure the installation directory is in your PATH:
    ```bash
    # Find where pip installed the package
    pip show jade
@@ -70,14 +131,14 @@ If you get a "Command not found" error after installation:
    echo %PATH%  # On Windows
    ```
 
-#### Lock File Compatibility Warning
+2. You may need to add the pip installation directory to your PATH:
+   ```bash
+   # On Linux/macOS (add to your .bashrc or .zshrc)
+   export PATH="$HOME/.local/bin:$PATH"
 
-If you see warnings about the lock file not being compatible with your version of Poetry:
-
-```bash
-# Regenerate the lock file for your Poetry version
-poetry lock --no-update
-```
+   # On Windows (PowerShell)
+   $env:PATH += ";$env:APPDATA\Python\Python312\Scripts"
+   ```
 
 #### Python Version Error
 
@@ -90,32 +151,6 @@ If you get errors related to Python version requirements:
 
 2. Ensure you have Python 3.12 or later installed, as required by JADE.
 
-#### WSL Python Not Found Error
-
-If you encounter the error `[Errno 2] No such file or directory: 'python'` when running `poetry install` in WSL:
-
-1. Use the included `poetry-wsl` wrapper script which automatically detects and uses either `python` or `python3`:
-   ```bash
-   # Make the script executable (only needed once)
-   chmod +x poetry-wsl
-
-   # Use the wrapper script instead of calling poetry directly
-   ./poetry-wsl install
-   ```
-
-2. Alternatively, you can:
-   - Create a symbolic link to make "python" point to your Python 3.12 installation:
-     ```bash
-     sudo ln -sf /usr/bin/python3.12 /usr/bin/python
-     ```
-   - Or tell Poetry which Python executable to use:
-     ```bash
-     poetry env use python3.12
-     poetry install
-     ```
-
-See the [WSL Notes](#wsl-notes) section for more detailed instructions.
-
 ### Platform Compatibility
 
 JADE is designed to be cross-platform and can be run on:
@@ -125,14 +160,6 @@ JADE is designed to be cross-platform and can be run on:
 - Linux
 - Windows Subsystem for Linux (WSL)
 
-#### Windows-Specific Notes
-
-On Windows, you might need to:
-
-1. Use PowerShell or Command Prompt with appropriate permissions
-2. Use `%PATH%` instead of `$PATH` when checking environment variables
-3. If using WSL, remember that Poetry environments in WSL are separate from Windows environments
-
 #### WSL Notes
 
 When running in WSL:
@@ -141,7 +168,7 @@ When running in WSL:
    ```bash
    # Install Python 3.12 in WSL (Ubuntu/Debian)
    sudo apt update
-   sudo apt install python3.12
+   sudo apt install python3.12 python3.12-venv python3.12-dev python3-pip
 
    # Create a symbolic link to make 'python' point to 'python3.12'
    sudo ln -sf /usr/bin/python3.12 /usr/bin/python
@@ -150,57 +177,116 @@ When running in WSL:
    python --version  # Should show Python 3.12.x
    ```
 
-2. You may need to run `poetry config virtualenvs.in-project true` to ensure virtual environments are created in the project directory
+2. Install JADE in WSL using one of the methods below:
 
-3. If you encounter the error `[Errno 2] No such file or directory: 'python'` when running `poetry install`:
-   - This occurs because Poetry is looking for an executable named exactly "python" but can't find it
-   - WSL often has Python installed as "python3" rather than "python"
-   - Use the included `poetry-wsl` wrapper script which automatically detects and uses either `python` or `python3`:
-     ```bash
-     # Make the script executable (only needed once)
-     chmod +x poetry-wsl
-
-     # Use the wrapper script instead of calling poetry directly
-     ./poetry-wsl install
-     ```
-   - Alternatively, you can:
-     - Use the symbolic link command above to create a "python" executable
-     - Or tell Poetry which Python executable to use:
-       ```bash
-       # Tell Poetry to use python3.12 specifically
-       poetry env use python3.12
-
-       # Then install dependencies
-       poetry install
-       ```
-
-4. You can run JADE in WSL in two ways:
-
-   a. Using `poetry shell` (traditional method):
+   **Method 1: Using Poetry (Recommended)**
    ```bash
+   # Install Poetry if you don't have it
+   curl -sSL https://install.python-poetry.org | python3 -
+
+   # Navigate to the JADE repository in WSL
+   cd /path/to/jade
+
+   # Install using Poetry
+   poetry install
+
+   # Run JADE using Poetry
+   poetry run jade --help
+   ```
+
+   **Method 2: Using a Virtual Environment (Recommended for Debian/Ubuntu)**
+   ```bash
+   # Navigate to the JADE repository in WSL
+   cd /path/to/jade
+
+   # Create a virtual environment
+   python -m venv .venv
+
    # Activate the virtual environment
-   poetry shell
+   source .venv/bin/activate
 
-   # Then run jade commands
-   jade --help
+   # Install JADE in development mode
+   pip install -e .
    ```
 
-   b. Using the `jade-wsl` wrapper script (recommended):
+   **Method 3: Using pipx**
    ```bash
-   # Make the script executable (only needed once after cloning the repository)
-   chmod +x jade-wsl
+   # Install pipx if you don't have it
+   python -m pip install --user pipx
+   python -m pipx ensurepath
 
-   # Run jade commands directly without poetry shell
-   ./jade-wsl --help
+   # Install JADE using pipx
+   pipx install -e /path/to/jade
    ```
 
-   The wrapper script automatically activates the virtual environment and runs the jade command, eliminating the need for `poetry shell`.
-
-   > **Note**: The `chmod +x` command needs to be run in WSL, not in Windows PowerShell or Command Prompt.
+   **Note:** Direct pip installation (`pip install -e .`) will likely fail with an "externally-managed-environment" error in Debian/Ubuntu WSL environments due to PEP 668 restrictions. Use one of the methods above instead.
 
 ## Usage
 
-### Standard Usage (after activating virtual environment)
+### Running JADE from Any Directory
+
+Depending on your installation method, you can run JADE from any Java repository:
+
+#### If installed with Poetry:
+
+```bash
+# Navigate to your Java repository
+cd /path/to/your/java/repo
+
+# Option 1: Run JADE using Poetry from the JADE directory
+cd /path/to/jade
+poetry run jade --project-dir=/path/to/your/java/repo
+
+# Option 2: If you're in a Poetry shell
+cd /path/to/jade
+poetry shell
+cd /path/to/your/java/repo
+jade
+```
+
+#### If installed in a virtual environment:
+
+```bash
+# Activate the virtual environment
+# On Windows:
+\path\to\jade\.venv\Scripts\activate
+# On Linux/macOS:
+source /path/to/jade/.venv/bin/activate
+
+# Navigate to your Java repository
+cd /path/to/your/java/repo
+
+# Run JADE
+jade
+```
+
+#### If installed with pipx:
+
+```bash
+# Navigate to your Java repository
+cd /path/to/your/java/repo
+
+# Run JADE (it will analyze the current directory by default)
+jade
+
+# Or explicitly specify the project directory
+jade --project-dir=.
+```
+
+#### If installed globally:
+
+```bash
+# Navigate to your Java repository
+cd /path/to/your/java/repo
+
+# Run JADE (it will analyze the current directory by default)
+jade
+
+# Or explicitly specify the project directory
+jade --project-dir=.
+```
+
+### Command Options
 
 ```bash
 # Basic usage (compare HEAD to previous commit)
@@ -219,29 +305,6 @@ jade --project-dir=/path/to/project        # Specify project directory
 jade --test-dir=/path/to/tests             # Specify test directory
 jade --build-tool=gradle                   # Specify build tool
 jade --output-file=results.txt             # Save results to file
-```
-
-### WSL Usage with Wrapper Script
-
-In WSL, you can use the `jade-wsl` wrapper script to run commands without activating the virtual environment first:
-
-```bash
-# Basic usage (compare HEAD to previous commit)
-./jade-wsl
-
-# Compare with specific commits/branches
-./jade-wsl -c 3                                  # Compare to 3rd previous commit
-./jade-wsl --branch=feature-branch               # Compare to another branch
-./jade-wsl --branch=branch1 --branch=branch2     # Compare two branches
-./jade-wsl --commit=abc123                       # Compare to specific commit
-
-# Additional options
-./jade-wsl --tests-only                          # Show only impacted tests
-./jade-wsl --run-tests                           # Run the impacted tests
-./jade-wsl --project-dir=/path/to/project        # Specify project directory
-./jade-wsl --test-dir=/path/to/tests             # Specify test directory
-./jade-wsl --build-tool=gradle                   # Specify build tool
-./jade-wsl --output-file=results.txt             # Save results to file
 ```
 
 ## How It Works
