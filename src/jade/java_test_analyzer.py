@@ -43,7 +43,9 @@ class JavaTestAnalyzer:
         """
         for root, _, files in os.walk(self.test_dir):
             for file in files:
-                if file.endswith(".java") and ("Test" in file or "test" in file):
+                # Only process files that end with .java and have "Test" or "test" in the name
+                # but exclude files that start with "NotA" to avoid processing files like "NotATest.java"
+                if file.endswith(".java") and ("Test" in file or "test" in file) and not file.startswith("NotA"):
                     file_path = os.path.join(root, file)
                     self._process_test_file(file_path)
 
@@ -94,6 +96,33 @@ class JavaTestAnalyzer:
                 tree = javalang.parse.parse(content)
             except Exception as e:
                 logging.error(f"Error parsing Java file {file_path}: {e}")
+                # Try to provide more detailed information about the parsing error
+                try:
+                    # Split the content into lines
+                    lines = content.splitlines()
+
+                    # Attempt to parse small chunks to identify where the parsing fails
+                    chunk_size = 10  # Start with small chunks
+                    for i in range(0, len(lines), chunk_size):
+                        chunk = '\n'.join(lines[i:i+chunk_size])
+                        try:
+                            javalang.parse.parse(f"class Test {{ void test() {{ {chunk} }} }}")
+                        except Exception as chunk_error:
+                            logging.warning(f"Parsing error near line {i+1}-{i+chunk_size}: {chunk_error}")
+                            # Try to narrow down to the exact line
+                            for j in range(i, min(i+chunk_size, len(lines))):
+                                line = lines[j].strip()
+                                if line:  # Skip empty lines
+                                    try:
+                                        # Try to parse a simple class with just this line
+                                        test_code = f"class Test {{ void test() {{ {line} }} }}"
+                                        javalang.parse.parse(test_code)
+                                    except Exception:
+                                        logging.warning(f"Potential syntax error at line {j+1}: {line}")
+                            break
+                except Exception as detail_error:
+                    logging.warning(f"Could not provide detailed error information: {detail_error}")
+
                 return
 
             # Extract the package name

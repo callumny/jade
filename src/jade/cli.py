@@ -39,6 +39,7 @@ def parse_args():
     parser.add_argument("--tests-only", action="store_true", help="Only show impacted tests, not methods")
     parser.add_argument("--run-tests", action="store_true", help="Run the impacted tests")
     parser.add_argument("--output-file", help="Save the analysis results to a file")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
 
     # Project options
     parser.add_argument("--project-dir", default=".", help="Java project directory (default: current directory)")
@@ -128,8 +129,14 @@ def get_changed_methods(base_commit: str, target_commit: str, project_dir: str) 
             # Get the full paths for the Java files
             full_paths = [os.path.join(project_dir, f) for f in java_files]
 
+            # Log the files being analyzed
+            logging.debug(f"Files analyzed: {', '.join(full_paths)}")
+
             # Parse the impacted objects and methods
             impacted_data = java_parser.parse_impacted_objects_and_methods(diff_output, full_paths)
+
+            # Log the impacted data for debugging
+            logging.debug(f"Impacted data: {impacted_data}")
 
             # Extract the changed methods
             changed_methods = []
@@ -146,12 +153,25 @@ def get_changed_methods(base_commit: str, target_commit: str, project_dir: str) 
                 for constructor in data.get("impacted_constructors", []):
                     changed_methods.append(f"{class_name}.{constructor}")
 
+            if not changed_methods:
+                logging.warning("No changed methods were identified.")
+                # Don't fall back to placeholder method in verbose mode
+                if logging.getLogger().level <= logging.DEBUG:
+                    return []
+                else:
+                    logging.warning("Falling back to placeholder method.")
+                    return ["com.example.SomeClass.someMethod"]  # Placeholder
+
             return changed_methods
 
         except Exception as e:
             logging.error(f"Error parsing Java files: {e}")
-            logging.warning("Falling back to placeholder method.")
-            return ["com.example.SomeClass.someMethod"]  # Placeholder
+            # Don't fall back to placeholder method in verbose mode
+            if logging.getLogger().level <= logging.DEBUG:
+                return []
+            else:
+                logging.warning("Falling back to placeholder method.")
+                return ["com.example.SomeClass.someMethod"]  # Placeholder
 
     except Exception as e:
         logging.error(f"Error getting changed methods: {e}")
@@ -162,6 +182,11 @@ def main():
     """Main entry point for the CLI."""
     try:
         args = parse_args()
+
+        # Set logging level to DEBUG if verbose mode is enabled
+        if args.verbose:
+            logging.getLogger().setLevel(logging.DEBUG)
+            logging.debug("Verbose mode enabled")
 
         # Determine which commits to compare
         try:

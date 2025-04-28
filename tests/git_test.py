@@ -2,6 +2,72 @@ from unittest.mock import patch
 
 from src.jade.git import *
 
+def test_get_previous_commit():
+    # Mock output of the `git rev-parse HEAD~1` command
+    mock_output = "a3912c84e9f1b7c0037f283ed14021ba9bed5362"
+
+    # Prepare the mock CompletedProcess response
+    mock_result = subprocess.CompletedProcess(
+        args=["git", "rev-parse", "HEAD~1"], returncode=0, stdout=mock_output, stderr=""
+    )
+
+    # Mock subprocess.run to return the mocked output
+    with patch("subprocess.run", return_value=mock_result) as mock_subprocess:
+        result = get_previous_commit(1)  # Call the function being tested
+
+        # Assertions to check the behavior
+        mock_subprocess.assert_called_once_with(
+            ["git", "rev-parse", "HEAD~1"],
+            capture_output=True,
+            text=True,
+        )
+        # Expected result based on the mock output
+        assert result == "a3912c84e9f1b7c0037f283ed14021ba9bed5362"
+
+def test_get_previous_commit_with_n():
+    # Mock output of the `git rev-parse HEAD~3` command
+    mock_output = "9961f321e9f1b7c0037f283ed14021ba9bed5362"
+
+    # Prepare the mock CompletedProcess response
+    mock_result = subprocess.CompletedProcess(
+        args=["git", "rev-parse", "HEAD~3"], returncode=0, stdout=mock_output, stderr=""
+    )
+
+    # Mock subprocess.run to return the mocked output
+    with patch("subprocess.run", return_value=mock_result) as mock_subprocess:
+        result = get_previous_commit(3)  # Call the function being tested
+
+        # Assertions to check the behavior
+        mock_subprocess.assert_called_once_with(
+            ["git", "rev-parse", "HEAD~3"],
+            capture_output=True,
+            text=True,
+        )
+        # Expected result based on the mock output
+        assert result == "9961f321e9f1b7c0037f283ed14021ba9bed5362"
+
+def test_get_branch_head():
+    # Mock output of the `git rev-parse main` command
+    mock_output = "e74f546d5ff6481337cee804403985962440319f"
+
+    # Prepare the mock CompletedProcess response
+    mock_result = subprocess.CompletedProcess(
+        args=["git", "rev-parse", "main"], returncode=0, stdout=mock_output, stderr=""
+    )
+
+    # Mock subprocess.run to return the mocked output
+    with patch("subprocess.run", return_value=mock_result) as mock_subprocess:
+        result = get_branch_head("main")  # Call the function being tested
+
+        # Assertions to check the behavior
+        mock_subprocess.assert_called_once_with(
+            ["git", "rev-parse", "main"],
+            capture_output=True,
+            text=True,
+        )
+        # Expected result based on the mock output
+        assert result == "e74f546d5ff6481337cee804403985962440319f"
+
 def test_get_diff_files():
     # Mock output of the `git diff --name-only` command
     mock_output = """
